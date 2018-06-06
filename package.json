@@ -1,0 +1,38 @@
+{
+  "author": {
+    "name": "Eugene Schava",
+	"email": "eschava@gmail.com"
+  },
+  "dependencies": {
+    "noble": "^1.8.1"
+  },
+  "description": "Xiaomi Bluetooth4 (BLE) sensors",
+  "devDependencies": {},
+  "keywords": [
+    "ble",
+    "bluetooth",
+    "bluetooth4",
+    "humidity",
+    "mijia",
+	"miflora",
+    "node-red",
+    "nodered",
+    "sensor",
+    "temperature",
+    "xiaomi"
+  ],
+  "license": "MIT",
+  "name": "node-red-contrib-xiaomi-ble",
+  "node-red": {
+    "nodes": {
+      "xiaomi-ble": "xiaomi-ble.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eschava/node-red-contrib-xiaomi-ble.git"
+  },
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "version": "1.0.0"
+}

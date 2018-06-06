@@ -1,0 +1,36 @@
+<script type="text/javascript">
+    RED.nodes.registerType('Xiaomi BLE',{
+        category: 'Bluetooth',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value:""},
+			address: {value:"", validate:RED.validators.regex(/[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]/) }
+        },
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
+        label: function() {
+            return this.name||"Xiaomi BLE";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="Xiaomi BLE">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-address"><i class="icon-tag"></i> Address</label>
+        <input type="text" id="node-input-address" placeholder="XX:XX:XX:XX:XX:XX">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="Xiaomi BLE">
+    <p>Xiaomi Bluetooth4 (BLE) sensors</p>
+	<p>Currently supported:</p>
+	<ul>
+		<li>MiFlora - Xiaomi Mi plant sensor</li>
+		<li>Xiaomi Mijia Bluetooth Temperature Humidity Sensor (MJ_HT_V1)</li>
+	</ul>
+</script>
