@@ -97,10 +97,6 @@ module.exports = function(RED) {
 			var msg = {};
 			var sent = false;
 			
-			var disconnectTimeout = setTimeout(function() {
-				peripheral.disconnect();
-			}, 30000);
-			
 			var send = function() {
 				if (!sent) {
 					if (Object.keys(msg).length > 0) {
@@ -115,8 +111,9 @@ module.exports = function(RED) {
 					clearTimeout(disconnectTimeout);
 				}
 			}
-			
+
 			peripheral.once('disconnect', send);
+            var disconnectTimeout = setTimeout(send, 30000);
 
 			peripheral.connect(function(error) {
 				if (error != null) {
