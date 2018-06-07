@@ -33,6 +33,6 @@
     "url": "git+https://github.com/eschava/node-red-contrib-xiaomi-ble.git"
   },
   "optionalDependencies": {},
-  "readme": "ERROR: No README data found!",
-  "version": "1.0.0"
+  "readme": "README.md",
+  "version": "1.0.1"
 }
