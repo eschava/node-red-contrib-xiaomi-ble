@@ -20,9 +20,8 @@ npm install node-red-contrib-xiaomi-ble
 
 ## Usage
 
-Xiaomi BLE node requires only bluetooth address of devices. Produced messages contain next fields:
+Xiaomi BLE node requires only bluetooth address of devices. "payload" value of produced messages contains next fields:
 * _temperature_ - temperature from sensor
-* _payload_ - same as temperature
 * _battery_ - battery level in percents
 * _humidity_ - Mijia Temperature Humidity device only
 * _light_, _moisture_, _conductivity_ - MiFlora device only

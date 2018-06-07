@@ -34,16 +34,20 @@ module.exports = function(RED) {
 				for (var i = 0; i < characteristics.length; i++) {
 					var chr = characteristics[i];
 					if (chr.uuid === '226caa5564764566756266734470666d') {
-						chr.once('data', function(data, isNotification) { 
-							var result = /T=(\d+\.\d+) H=(\d+\.\d+)/.exec(data.toString());
-							if (result != null ) {
-								msg.payload = msg.temperature = parseFloat(result[1]);
-								msg.humidity = parseFloat(result[2]);
-								if (++dataCount == 2) send();
-							} else {
-								node.error('Incorrect data: ' + data);
-							}
-						});
+					    var dataFunction = function(data, isNotification) {
+                            var result = /T=(\d+\.\d+) H=(\d+\.\d+)/.exec(data.toString());
+                            if (result != null ) {
+                                msg.temperature = parseFloat(result[1]);
+                                msg.humidity = parseFloat(result[2]);
+                                if (++dataCount == 2) send();
+                            } else {
+                                node.error('Incorrect data: ' + data);
+                            }
+                        };
+
+						chr.once('data', dataFunction);
+                        setTimeout(function() {chr.removeListener('data', dataFunction);}, 30000); // remove handler if no data received
+
 						chr.subscribe(function(error) {
 							if (error) node.error('Subscribe error: ' + error);
 						});
@@ -77,7 +81,7 @@ module.exports = function(RED) {
 						return;
 					}
 					
-					msg.payload = msg.temperature = (256 * data[1] + data[0]) / 10.0;
+					msg.temperature = (256 * data[1] + data[0]) / 10.0;
 					msg.light = 256 * data[4] + data[3];
 					msg.moisture = data[7];
 					msg.conductivity = 256 * data[9] + data[8];
@@ -100,7 +104,7 @@ module.exports = function(RED) {
 			var send = function() {
 				if (!sent) {
 					if (Object.keys(msg).length > 0) {
-						node.send(msg);
+						node.send({payload: msg});
 						node.status({});
 					} else {
 						node.status({fill:"red", shape:"dot", text:"no data"});
