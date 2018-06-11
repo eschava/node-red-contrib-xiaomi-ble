@@ -4,7 +4,8 @@
         color: '#a6bbcf',
         defaults: {
             name: {value:""},
-			address: {value:"", validate:RED.validators.regex(/[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]/) }
+			address: {value:"", validate:RED.validators.regex(/^$|[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]:[0-9a-fA-F][0-9a-fA-F]/) },
+			scanningTimeout: {value:60, validate:RED.validators.number() }
         },
         inputs:1,
         outputs:1,
@@ -21,8 +22,12 @@
         <input type="text" id="node-input-name" placeholder="Name">
     </div>
     <div class="form-row">
-        <label for="node-input-address"><i class="icon-tag"></i> Address</label>
+        <label for="node-input-address"><i class="icon-tag"></i> Address (optional)</label>
         <input type="text" id="node-input-address" placeholder="XX:XX:XX:XX:XX:XX">
+    </div>
+    <div class="form-row">
+        <label for="node-input-scanningTimeout"><i class="icon-tag"></i> Scanning timeout (in seconds)</label>
+        <input type="text" id="node-input-scanningTimeout" placeholder="60">
     </div>
 </script>
 
@@ -33,4 +38,6 @@
 		<li>MiFlora - Xiaomi Mi plant sensor</li>
 		<li>Xiaomi Mijia Bluetooth Temperature Humidity Sensor (MJ_HT_V1)</li>
 	</ul>
+
+	<p>If <code>address</code> configuration parameter is not specified then input message should have <code>msg.address</code> field.</p>
 </script>

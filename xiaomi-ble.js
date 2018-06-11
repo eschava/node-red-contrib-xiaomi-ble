@@ -6,6 +6,7 @@ module.exports = function(RED) {
     function XiaomiBleNode(config) {
         RED.nodes.createNode(this, config);
         var node = this;
+
 		node.peripheral = null;
 		node.scanningActive = false;
 		node.stopScanningTimeout = null;
@@ -104,7 +105,7 @@ module.exports = function(RED) {
 			var send = function() {
 				if (!sent) {
 					if (Object.keys(msg).length > 0) {
-						node.send({payload: msg});
+						node.send({payload: msg, address: peripheral.address});
 						node.status({});
 					} else {
 						node.status({fill:"red", shape:"dot", text:"no data"});
@@ -136,24 +137,34 @@ module.exports = function(RED) {
         }
 		
         node.on('input', function(msg) {
+            // if address from message was changed: start scanning
+            if (node.peripheral != null && 'address' in msg && msg.address && node.peripheral.address != msg.address.toLowerCase()) {
+                node.peripheral = null;
+            }
+
 			if (node.peripheral != null) {
 				getData(node.peripheral);
 			} else if (node.scanningActive) {
 				node.status({fill:"yellow", shape:"dot", text:"searching"});
 			} else {
+			    var address = msg.address || config.address;
+			    if (!address) {
+			        node.status({fill:"red", shape:"dot", text:"address is not specified"});
+			        return;
+			    }
 				node.scanningActive = true;
 				node.status({fill:"green", shape:"dot", text:"searching"});
-				
+
 				node.stopScanningTimeout = setTimeout(function() {
 					noble.stopScanning();
-				}, 60000);
-				
+				}, parseInt(config.scanningTimeout) * 1000);
+
 				var foundDevices = [];
 			
 				var discover = function(peripheral) {
 					foundDevices.push(peripheral.address);
 					
-					if (peripheral.address === config.address.toLowerCase()) {
+					if (peripheral.address === address.toLowerCase()) {
 						node.peripheral = peripheral;
 						noble.removeListener('discover', discover);
 						node.scanningActive = false;
@@ -168,7 +179,7 @@ module.exports = function(RED) {
 					node.scanningActive = false;
 					if (node.peripheral == null) {
 						node.status({fill:"red", shape:"dot", text:"not found"});
-						node.error('Device ' + config.address + ' not found among [' + foundDevices + ']');
+						node.error('Device ' + address + ' not found among [' + foundDevices + ']');
 					}
 				});
 			

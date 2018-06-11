@@ -20,7 +20,11 @@ npm install node-red-contrib-xiaomi-ble
 
 ## Usage
 
-Xiaomi BLE node requires only bluetooth address of devices. "payload" value of produced messages contains next fields:
+**Configuration:** Xiaomi BLE node needs only bluetooth address of devices (optional, if it's omitted then incoming message should have **address** property)
+
+**Input message:** just triggers requesting data from the sensor. Could have **address** property overriding address of the device from configuration.  
+
+**Output message:** **msg.payload** object of the output message could contain next fields:
 * _temperature_ - temperature from sensor
 * _battery_ - battery level in percents
 * _humidity_ - Mijia Temperature Humidity device only
@@ -32,3 +36,12 @@ On Linux bluetooth adapter could be used by root user only.
 
 To run node-red without root/sudo use instructions from [noble](https://github.com/noble/noble#running-on-linux)
 
+
+## Version history
+
+
+1.0.0 Initial release
+
+1.1.0 Changed format of output message
+
+1.2.0 Device's address could be specified in input message + configurable scanning timeout
