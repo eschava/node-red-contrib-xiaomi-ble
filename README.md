@@ -45,3 +45,5 @@ To run node-red without root/sudo use instructions from [noble](https://github.c
 1.1.0 Changed format of output message
 
 1.2.0 Device's address could be specified in input message + configurable scanning timeout
+
+1.2.1 Memory leak fixed

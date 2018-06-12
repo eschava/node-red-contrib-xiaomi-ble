@@ -114,6 +114,7 @@ module.exports = function(RED) {
 					node.requestActive = false;
 					peripheral.disconnect();
 					clearTimeout(disconnectTimeout);
+					peripheral.removeListener('disconnect', send);
 				}
 			}
 
