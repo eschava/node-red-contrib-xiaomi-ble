@@ -105,9 +105,10 @@ module.exports = function(RED) {
 			var send = function() {
 				if (!sent) {
 					if (Object.keys(msg).length > 0) {
-						node.send({payload: msg, address: peripheral.address});
+						node.send({payload: msg, address: peripheral.address, valid_data: true});
 						node.status({});
 					} else {
+						node.send({payload: msg, address: peripheral.address, valid_data: false});
 						node.status({fill:"red", shape:"dot", text:"no data"});
 					}
 					sent = true;
