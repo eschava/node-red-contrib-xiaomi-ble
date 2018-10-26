@@ -22,7 +22,9 @@ npm install node-red-contrib-xiaomi-ble
 
 **Configuration:** Xiaomi BLE node needs only bluetooth address of devices (optional, if it's omitted then incoming message should have **address** property)
 
-**Input message:** just triggers requesting data from the sensor. Could have **address** property overriding address of the device from configuration.  
+**Input message:** just triggers requesting data from the sensor. Optional parameters:
+* _address_ - override address of the device from configuration.
+* _scan_ - re-lookup for device even if it was already found before.
 
 **Output message:** **msg.payload** object of the output message could contain next fields:
 * _temperature_ - temperature from sensor
@@ -47,3 +49,5 @@ To run node-red without root/sudo use instructions from [noble](https://github.c
 1.2.0 Device's address could be specified in input message + configurable scanning timeout
 
 1.2.1 Memory leak fixed
+
+1.2.2 Added 'scan' parameter to message to force scanning
