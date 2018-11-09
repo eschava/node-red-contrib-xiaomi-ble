@@ -140,7 +140,7 @@ module.exports = function(RED) {
         node.on('input', function(msg) {
             // if address from message was changed: start scanning
             var forceScan = 'scan' in msg && msg.scan;
-            var addressChanged = 'address' in msg && msg.address && node.peripheral.address != msg.address.toLowerCase();
+            var addressChanged = node.peripheral != null && 'address' in msg && msg.address && node.peripheral.address != msg.address.toLowerCase();
             if (forceScan || addressChanged) {
                 node.peripheral = null;
             }
