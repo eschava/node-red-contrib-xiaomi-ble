@@ -51,3 +51,5 @@ To run node-red without root/sudo use instructions from [noble](https://github.c
 1.2.1 Memory leak fixed
 
 1.2.2 Added 'scan' parameter to message to force scanning
+
+1.2.3 Bug-fix release

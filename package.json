@@ -33,5 +33,5 @@
     "url": "git+https://github.com/eschava/node-red-contrib-xiaomi-ble.git"
   },
   "optionalDependencies": {},
-  "version": "1.2.2"
+  "version": "1.2.3"
 }
