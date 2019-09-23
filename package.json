@@ -4,7 +4,7 @@
 	"email": "eschava@gmail.com"
   },
   "dependencies": {
-    "noble": "^1.8.1"
+    "@abandonware/noble": "^1.9.2-5"
   },
   "description": "Xiaomi Bluetooth4 (BLE) sensors",
   "devDependencies": {},
@@ -33,5 +33,5 @@
     "url": "git+https://github.com/eschava/node-red-contrib-xiaomi-ble.git"
   },
   "optionalDependencies": {},
-  "version": "1.2.3"
+  "version": "1.2.4"
 }
