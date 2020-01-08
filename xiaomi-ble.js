@@ -1,8 +1,9 @@
 module.exports = function(RED) {
     "use strict";
 
-    var noble = require('@abandonware/noble');
-	
+	var noble = require('@abandonware/noble');
+	const clearGrassCgg1Uuid = '582d3410b29b';
+
     function XiaomiBleNode(config) {
         RED.nodes.createNode(this, config);
         var node = this;
@@ -11,10 +12,10 @@ module.exports = function(RED) {
 		node.scanningActive = false;
 		node.stopScanningTimeout = null;
 		node.requestActive = false;
-		
+
 		function mijiaTemperatureRead(peripheral, msg, send) {
 			var dataCount = 0;
-			
+
 			// read battery
 			peripheral.readHandle(0x18, function (error, data) {
 				if (error != null) {
@@ -24,14 +25,14 @@ module.exports = function(RED) {
 				msg.battery = data.toString().charCodeAt(0);
 				if (++dataCount == 2) send();
 			});
-			
+
 			// subscribe for data (temperature+humidity)
 			peripheral.discoverSomeServicesAndCharacteristics(['226c000064764566756266734470666d'], ['226caa5564764566756266734470666d'], function(error, services, characteristics) {
 				if (error != null) {
 					node.status({fill:"red", shape:"dot", text:"cannot discover services: " + error});
 					return;
 				}
-				
+
 				for (var i = 0; i < characteristics.length; i++) {
 					var chr = characteristics[i];
 					if (chr.uuid === '226caa5564764566756266734470666d') {
@@ -56,7 +57,7 @@ module.exports = function(RED) {
 				}
 			});
 		}
-		
+
 		function mifloraRead(peripheral, msg, send) {
 			var dataCount = 0;
 
@@ -81,7 +82,7 @@ module.exports = function(RED) {
 						node.status({fill:"red", shape:"dot", text:"cannot read data: " + error});
 						return;
 					}
-					
+
 					msg.temperature = (256 * data[1] + data[0]) / 10.0;
 					msg.light = 256 * data[4] + data[3];
 					msg.moisture = data[7];
@@ -90,7 +91,7 @@ module.exports = function(RED) {
 				});
 			});
 		}
-		
+
 
 		function cleargrassTempHumiRead(peripheral, msg, send) {
 			var serviceData = peripheral.advertisement.serviceData;
@@ -133,10 +134,10 @@ module.exports = function(RED) {
 			}
 			node.status({fill:"green", shape:"dot", text:"requesting"});
 			node.requestActive = true;
-			
+
 			var msg = {};
 			var sent = false;
-			
+
 			var send = function() {
 				if (!sent) {
 					if (Object.keys(msg).length > 0) {
@@ -164,21 +165,25 @@ module.exports = function(RED) {
 					return;
 				}
 
-				if (peripheral.uuid === '582d3410b29b') { // ClearGrass CGG1
-					cleargrassTempHumiRead(peripheral, msg, send);
-				} else if (peripheral.advertisement.serviceUuids.indexOf('fe95') >= 0) {
+				if (peripheral.advertisement.serviceUuids.indexOf('fe95') >= 0) {
 					mifloraRead(peripheral, msg, send);
+				} else if (peripheral.uuid === clearGrassCgg1Uuid) {
+					cleargrassTempHumiRead(peripheral, msg, send);
 				} else {
 					mijiaTemperatureRead(peripheral, msg, send);
 				}
 			});
         }
-		
+
         node.on('input', function(msg) {
             // if address from message was changed: start scanning
             var forceScan = 'scan' in msg && msg.scan;
             var addressChanged = node.peripheral != null && 'address' in msg && msg.address && node.peripheral.address != msg.address.toLowerCase();
-            if (forceScan || addressChanged) {
+			if (peripheral.uuid === clearGrassCgg1Uuid) {
+				// we need to scan every time because the data is read from the advertisement info
+				forceScan = true;
+			}
+			if (forceScan || addressChanged) {
                 node.peripheral = null;
             }
 
@@ -200,20 +205,20 @@ module.exports = function(RED) {
 				}, parseInt(config.scanningTimeout) * 1000);
 
 				var foundDevices = [];
-			
+
 				var discover = function(peripheral) {
 					foundDevices.push(peripheral.address);
-					
+
 					if (peripheral.address === address.toLowerCase()) {
 						node.peripheral = peripheral;
 						noble.removeListener('discover', discover);
 						node.scanningActive = false;
-						
+
 						getData(node.peripheral);
 					}
 				}
 				noble.on('discover', discover);
-				
+
 				noble.once('scanStop', function() {
 					noble.removeListener('discover', discover);
 					node.scanningActive = false;
@@ -222,20 +227,23 @@ module.exports = function(RED) {
 						node.error('Device ' + address + ' not found among [' + foundDevices + ']');
 					}
 				});
-			
+
+				// in order to get advertising information in BLE scan responses, we must set allowDuplicates to true
+				let allowDuplicates = true;
 				if (noble.state === 'poweredOn') {
-					noble.startScanning();
+					noble.startScanning([], allowDuplicates);
 				} else {
 					noble.once('stateChange', function(state) {
-						if (state === 'poweredOn')
-							noble.startScanning();
-						else
+						if (state === 'poweredOn') {
+							noble.startScanning([], allowDuplicates);
+						} else {
 							node.status({fill:"red", shape:"dot", text:"device status: " + state});
+						}
 					});
 				}
 			}
         });
-		
+
 		this.on('close', function() {
 			if (node.stopScanningTimeout)
 				clearTimeout(node.stopScanningTimeout);
