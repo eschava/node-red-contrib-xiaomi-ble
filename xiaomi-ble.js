@@ -26,7 +26,7 @@ module.exports = function(RED) {
 			});
 			
 			// subscribe for data (temperature+humidity)
-			peripheral.discoverSomeServicesAndCharacteristics(['226c000064764566756266734470666d'], ['226caa5564764566756266734470666d'], function(error, services, characteristics) {
+			peripheral.discoverSomeServicesAndCharacteristics(['226c000064764566756266734470666d', 'ebe0ccb07a0a4b0c8a1a6ff2997da3a6'], ['226caa5564764566756266734470666d', 'ebe0ccc17a0a4b0c8a1a6ff2997da3a6'], function(error, services, characteristics) {
 				if (error != null) {
 					node.status({fill:"red", shape:"dot", text:"cannot discover services: " + error});
 					return;
@@ -52,7 +52,33 @@ module.exports = function(RED) {
 						chr.subscribe(function(error) {
 							if (error) node.error('Subscribe error: ' + error);
 						});
-					}
+					} else if (chr.uuid === 'ebe0ccc17a0a4b0c8a1a6ff2997da3a6') {
+                        var dataFunction = function(data, isNotification) {
+                            // Code from https://github.com/jipema/xiaomi-mijia-thermometer/blob/master/XiaomiMijiaThermometer.js {{{{
+                            const prep = typeof data === typeof 's' ? data : JSON.stringify(data.toString('hex')).replace(/\"/gi, '');
+                            const humidity = parseInt(prep.substr(4, 2), 16);
+                            const tempRawHex = prep.substr(2, 2) + prep.substr(0, 2);
+                            let tempRaw;
+                            let isNegative = tempRawHex.substr(0, 1) === 'f';
+                            if (isNegative) {
+                                tempRaw = String(parseInt('ffff', 16) - parseInt(tempRawHex, 16));
+                            } else {
+                                tempRaw = parseInt(tempRawHex, 16).toString();
+                            }
+                            const temperature = (isNegative ? -1 : 1) * parseFloat(tempRaw.substr(0, tempRaw.length - 2) + '.' + tempRaw.substr(tempRaw.length - 2, 2));
+                            // }}}}
+                            msg.temperature = temperature;
+                            msg.humidity = humidity;
+                            if (++dataCount == 2) send();
+                        };
+
+                        chr.once('data', dataFunction);
+                        setTimeout(function() {chr.removeListener('data', dataFunction);}, 30000); // remove handler if no data received
+
+                        chr.subscribe(function(error) {
+                            if (error) node.error('Subscribe error: ' + error);
+                        });
+                    }
 				}
 			});
 		}
