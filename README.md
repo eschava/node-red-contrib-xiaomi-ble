@@ -55,3 +55,5 @@ To run node-red without root/sudo use instructions from [noble](https://github.c
 1.2.3 Bug-fix release
 
 1.2.4 Change noble dependency to @abandonware/noble as former package is unmaintained
+
+1.3.0 Added support of Xiaomi Mijia Bluetooth Thermometer 2 (aka LYWSD03MMC)
