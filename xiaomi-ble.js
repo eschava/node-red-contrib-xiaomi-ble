@@ -179,7 +179,7 @@ module.exports = function(RED) {
             // if address from message was changed: start scanning
             var forceScan = 'scan' in msg && msg.scan;
             var addressChanged = node.peripheral != null && 'address' in msg && msg.address && node.peripheral.address != msg.address.toLowerCase();
-			if (peripheral.uuid === clearGrassCgg1Uuid) {
+			if (node.peripheral != null && node.peripheral.uuid === clearGrassCgg1Uuid) {
 				// we need to scan every time because the data is read from the advertisement info
 				forceScan = true;
 			}
