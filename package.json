@@ -1,7 +1,7 @@
 {
   "author": {
     "name": "Eugene Schava",
-	"email": "eschava@gmail.com"
+    "email": "eschava@gmail.com"
   },
   "dependencies": {
     "@abandonware/noble": "^1.9.2-5"
@@ -14,7 +14,7 @@
     "bluetooth4",
     "humidity",
     "mijia",
-	"miflora",
+    "miflora",
     "node-red",
     "nodered",
     "sensor",
@@ -33,5 +33,5 @@
     "url": "git+https://github.com/eschava/node-red-contrib-xiaomi-ble.git"
   },
   "optionalDependencies": {},
-  "version": "1.3.0"
+  "version": "1.3.1"
 }
