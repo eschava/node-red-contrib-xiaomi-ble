@@ -147,7 +147,7 @@ module.exports = function(RED) {
 			peripheral.once('disconnect', send);
             var disconnectTimeout = setTimeout(send, 30000);
 
-			peripheral.connect(function(error) {
+			var connectCallback = function(error) {
 				if (error != null) {
 					node.status({fill:"red", shape:"dot", text:"cannot connect: " + error});
 					node.requestActive = false;
@@ -160,7 +160,9 @@ module.exports = function(RED) {
 				} else {
 					mijiaTemperatureRead(peripheral, msg, send);
 				}
-			});
+            };
+
+            (peripheral.state !== 'connected') ?  peripheral.connect(connectCallback) : connectCallback();
         }
 		
         node.on('input', function(msg) {
