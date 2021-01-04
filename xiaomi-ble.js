@@ -36,7 +36,7 @@ module.exports = function(RED) {
 					var chr = characteristics[i];
 					if (chr.uuid === '226caa5564764566756266734470666d') {
 					    var dataFunction = function(data, isNotification) {
-                            var result = /T=(\d+\.\d+) H=(\d+\.\d+)/.exec(data.toString());
+                            var result = /T=(\-?\d+\.\d+) H=(\d+\.\d+)/.exec(data.toString());
                             if (result != null ) {
                                 msg.temperature = parseFloat(result[1]);
                                 msg.humidity = parseFloat(result[2]);

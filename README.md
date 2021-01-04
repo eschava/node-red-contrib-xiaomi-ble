@@ -59,3 +59,5 @@ To run node-red without root/sudo use instructions from [noble](https://github.c
 1.3.0 Added support of Xiaomi Mijia Bluetooth Thermometer 2 (aka LYWSD03MMC)
 
 1.3.1 Protection from the "Peripheral already connected" error
+
+1.3.2 Negative temperature support
