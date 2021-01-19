@@ -12,7 +12,7 @@ module.exports = function(RED) {
 		node.stopScanningTimeout = null;
 		node.requestActive = false;
 		
-		function mijiaTemperatureRead(peripheral, msg, send) {
+		function mijiaTemperatureRead(peripheral, payload, send) {
 			var dataCount = 0;
 			
 			// read battery
@@ -21,7 +21,7 @@ module.exports = function(RED) {
 					node.status({fill:"red", shape:"dot", text:"cannot read battery: " + error});
 					return;
 				}
-				msg.battery = data.toString().charCodeAt(0);
+				payload.battery = data.toString().charCodeAt(0);
 				if (++dataCount == 2) send();
 			});
 			
@@ -38,8 +38,8 @@ module.exports = function(RED) {
 					    var dataFunction = function(data, isNotification) {
                             var result = /T=(\-?\d+\.\d+) H=(\d+\.\d+)/.exec(data.toString());
                             if (result != null ) {
-                                msg.temperature = parseFloat(result[1]);
-                                msg.humidity = parseFloat(result[2]);
+                                payload.temperature = parseFloat(result[1]);
+                                payload.humidity = parseFloat(result[2]);
                                 if (++dataCount == 2) send();
                             } else {
                                 node.error('Incorrect data: ' + data);
@@ -67,8 +67,8 @@ module.exports = function(RED) {
                             }
                             const temperature = (isNegative ? -1 : 1) * parseFloat(tempRaw.substr(0, tempRaw.length - 2) + '.' + tempRaw.substr(tempRaw.length - 2, 2));
                             // }}}}
-                            msg.temperature = temperature;
-                            msg.humidity = humidity;
+                            payload.temperature = temperature;
+                            payload.humidity = humidity;
                             if (++dataCount == 2) send();
                         };
 
@@ -83,7 +83,7 @@ module.exports = function(RED) {
 			});
 		}
 		
-		function mifloraRead(peripheral, msg, send) {
+		function mifloraRead(peripheral, payload, send) {
 			var dataCount = 0;
 
 			// read battery
@@ -92,7 +92,7 @@ module.exports = function(RED) {
 					node.status({fill:"red", shape:"dot", text:"cannot read battery: " + error});
 					return;
 				}
-				msg.battery = data.toString().charCodeAt(0);
+				payload.battery = data.toString().charCodeAt(0);
 				if (++dataCount == 2) send();
 			});
 
@@ -108,16 +108,16 @@ module.exports = function(RED) {
 						return;
 					}
 					
-					msg.temperature = (256 * data[1] + data[0]) / 10.0;
-					msg.light = 256 * data[4] + data[3];
-					msg.moisture = data[7];
-					msg.conductivity = 256 * data[9] + data[8];
+					payload.temperature = (256 * data[1] + data[0]) / 10.0;
+					payload.light = 256 * data[4] + data[3];
+					payload.moisture = data[7];
+					payload.conductivity = 256 * data[9] + data[8];
 					if (++dataCount == 2) send();
 				});
 			});
 		}
 		
-        function getData(peripheral) {
+        function getData(peripheral, msg) {
 			if (node.requestActive) {
 				node.status({fill:"yellow", shape:"dot", text:"requesting"});
 				return;
@@ -125,13 +125,16 @@ module.exports = function(RED) {
 			node.status({fill:"green", shape:"dot", text:"requesting"});
 			node.requestActive = true;
 			
-			var msg = {};
+			var payload = {};
 			var sent = false;
 			
 			var send = function() {
 				if (!sent) {
-					if (Object.keys(msg).length > 0) {
-						node.send({payload: msg, address: peripheral.address});
+					if (Object.keys(payload).length > 0) {
+					    //reuse received message
+					    msg.payload = payload;
+					    msg.address = peripheral.address;
+						node.send(msg);
 						node.status({});
 					} else {
 						node.status({fill:"red", shape:"dot", text:"no data"});
@@ -156,9 +159,9 @@ module.exports = function(RED) {
 				}
 				
 				if (peripheral.advertisement.serviceUuids.indexOf('fe95') >= 0) {
-					mifloraRead(peripheral, msg, send);
+					mifloraRead(peripheral, payload, send);
 				} else {
-					mijiaTemperatureRead(peripheral, msg, send);
+					mijiaTemperatureRead(peripheral, payload, send);
 				}
             };
 
@@ -174,7 +177,7 @@ module.exports = function(RED) {
             }
 
 			if (node.peripheral != null) {
-				getData(node.peripheral);
+				getData(node.peripheral, msg);
 			} else if (node.scanningActive) {
 				node.status({fill:"yellow", shape:"dot", text:"searching"});
 			} else {
@@ -200,7 +203,7 @@ module.exports = function(RED) {
 						noble.removeListener('discover', discover);
 						node.scanningActive = false;
 						
-						getData(node.peripheral);
+						getData(node.peripheral, msg);
 					}
 				}
 				noble.on('discover', discover);
